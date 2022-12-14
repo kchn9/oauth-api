@@ -1,0 +1,5 @@
+.env
+node_modules
+.eslintignore
+.prettierignore
+.prettierrs.json
