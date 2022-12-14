@@ -3,3 +3,4 @@ node_modules
 .eslintignore
 .prettierignore
 .prettierrs.json
+dist
