@@ -5,12 +5,16 @@
     "author": "kchn9",
     "license": "MIT",
     "private": true,
+    "prisma": {
+        "schema": "src/prisma/schema.prisma"
+    },
     "scripts": {
         "start": "NODE_ENV=\"production\" node dist/src/server.js",
         "dev": "NODE_ENV=\"development\" tsc-watch --onSuccess \"node ./dist/src/server.js\"",
         "build": "rm -rf dist && tsc"
     },
     "dependencies": {
+        "@prisma/client": "4.7.1",
         "config": "3.3.8",
         "dayjs": "1.11.7",
         "dotenv": "16.0.3",
@@ -18,7 +22,8 @@
         "pino": "8.7.0",
         "pino-http": "8.2.1",
         "pino-pretty": "9.1.1",
-        "ts-node": "10.9.1"
+        "ts-node": "10.9.1",
+        "zod": "3.20.2"
     },
     "devDependencies": {
         "@types/config": "3.3.0",
