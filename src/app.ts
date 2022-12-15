@@ -3,7 +3,7 @@ import { errorHandlingMiddleware } from "./middleware/errorHandling.middleware";
 import { httpLogger } from "./middleware/httpLogger.middleware";
 import { logger } from "./utils/logger.utils";
 import { PrismaClient } from "@prisma/client";
-import Controller from "interfaces/Controller.interface";
+import Controller from "./interfaces/Controller.interface";
 
 class App {
     private express: Application;
