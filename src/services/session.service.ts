@@ -69,6 +69,33 @@ class SessionService {
             throw e;
         }
     };
+
+    public refresh = async (refreshToken: string): Promise<string | false> => {
+        try {
+            const extractedRefreshToken = this.jwtUtils.verify(refreshToken);
+            if (typeof extractedRefreshToken === "string") return false;
+
+            const session = await this.dbClient.session.findUnique({
+                where: {
+                    id: extractedRefreshToken.id,
+                },
+            });
+            if (!session) return false;
+
+            const user = await this.userService.find({
+                id: session.userId,
+            });
+            if (!user) return false;
+
+            const newAccessToken = this.jwtUtils.sign(session, {
+                expiresIn: this.tokenConfig.accessTokenTtl,
+            });
+
+            return newAccessToken;
+        } catch (e) {
+            throw e;
+        }
+    };
 }
 
 export default SessionService;

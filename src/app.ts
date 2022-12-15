@@ -4,6 +4,7 @@ import { httpLogger } from "./middleware/httpLogger.middleware";
 import { logger } from "./utils/logger.utils";
 import { PrismaClient } from "@prisma/client";
 import Controller from "./interfaces/Controller.interface";
+import deserializeJwt from "./middleware/deserializeJwt.middleware";
 
 class App {
     private express: Application;
@@ -33,6 +34,7 @@ class App {
     private initializeMiddleware = (): void => {
         this.express.use(express.json());
         this.express.use(express.urlencoded({ extended: false }));
+        this.express.use(deserializeJwt);
         this.express.use(httpLogger());
     };
 
