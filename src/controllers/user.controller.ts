@@ -39,7 +39,7 @@ class UserController implements Controller {
                     e.meta && e.meta.target
                         ? `${e.meta.target.toString()} has to be unique.`
                         : "User fields to be unique.";
-                next(new HttpError(400, message));
+                next(new HttpError(409, message));
             }
             next(e);
         }
