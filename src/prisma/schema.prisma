@@ -16,6 +16,7 @@ model User {
     verificationCode     String?
     passwordResetCode    String?    @default(uuid())
     sessions             Session[]
+    notes                Note[]
     createdAt            DateTime   @default(now())
     updatedAt            DateTime   @updatedAt
 }
@@ -26,6 +27,16 @@ model Session {
     user                 User       @relation(fields: [userId], references: [id])
     userId               String
     userAgent            String?
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
+}
+
+model Note {
+    id                   String     @id @default(auto()) @map("_id") @db.ObjectId
+    title                String
+    content              String
+    user                 User       @relation(fields: [userId], references: [id])
+    userId               String
     createdAt            DateTime   @default(now())
     updatedAt            DateTime   @updatedAt
 }
