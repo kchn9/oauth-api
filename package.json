@@ -9,8 +9,12 @@
         "schema": "src/prisma/schema.prisma"
     },
     "scripts": {
-        "start": "NODE_ENV=\"production\" node dist/src/server.js",
-        "dev": "NODE_ENV=\"development\" tsc-watch --onSuccess \"node ./dist/src/server.js\"",
+        "start": "export NODE_ENV=\"production\" && node dist/src/server.js",
+        "db:create": "docker compose up --build -d && sleep 5 && yarn prisma db push",
+        "db:start": "docker compose unpause",
+        "db:stop": "docker compose pause",
+        "db:drop": "docker compose down -v",
+        "dev": "export NODE_ENV=\"development\" && tsc-watch --onSuccess \"node ./dist/src/server.js\"",
         "build": "rm -rf dist && tsc"
     },
     "dependencies": {

@@ -1,0 +1,13 @@
+services:
+  mongo:
+    build:
+      context: docker
+      dockerfile: replicaSet.Dockerfile
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: prisma
+      MONGO_INITDB_DATABASE: dev
+      MONGO_REPLICA_HOST: localhost
+      MONGO_REPLICA_PORT: 27018
+    ports:
+      - '27018:27018'
