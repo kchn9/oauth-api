@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
+import VerifiedToken from "../interfaces/VerifiedToken.interface";
+import JwtUtils from "../utils/jwt.utils";
 import { TokenExpiredError } from "jsonwebtoken";
 import SessionService from "../services/session.service";
-import JwtUtils from "../utils/jwt.utils";
+import { HttpError } from "../interfaces/errors/HttpError.interface";
 
 const deserializeJwt = async (
     req: Request,
@@ -10,35 +12,33 @@ const deserializeJwt = async (
 ) => {
     const jwt = new JwtUtils();
     const accessHeader = req.headers.authorization;
-    if (!accessHeader) {
-        return next();
-    }
+    if (!accessHeader) return next();
+
     const accessToken: string = accessHeader.replace(/^Bearer\s/, "");
     try {
-        const extractedToken = jwt.verify(accessToken); // throws when token expired or invalid
+        const extractedToken = jwt.verify(accessToken) as VerifiedToken; // throws when token expired or invalid
         res.locals.token = extractedToken;
-
         return next();
     } catch (e) {
         if (e instanceof TokenExpiredError) {
             const refreshHeader = req.get("x-refresh");
-            if (!refreshHeader) return next(e);
+            if (!refreshHeader) return next();
             try {
                 const sessionService = new SessionService();
                 const newAccessToken = await sessionService.refresh(
                     refreshHeader
                 );
-                if (!newAccessToken) return next(e);
+                if (!newAccessToken) return next();
                 res.setHeader("x-access-token", accessToken);
-                const newExtractedToken = jwt.verify(newAccessToken);
+                const newExtractedToken = jwt.verify(
+                    newAccessToken
+                ) as VerifiedToken;
                 res.locals.token = newExtractedToken;
-
-                return next();
             } catch (err) {
-                return next(err);
+                return next();
             }
         }
-        return next(e);
+        return next();
     }
 };
 
