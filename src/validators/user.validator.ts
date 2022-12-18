@@ -28,5 +28,13 @@ export const update = object({
     }).partial(),
 });
 
+export const verify = object({
+    params: object({
+        id: string(),
+        verificationCode: string(),
+    }),
+});
+
 export type CreateUserBody = TypeOf<typeof create>["body"];
 export type UpdateUserBody = TypeOf<typeof update>["body"];
+export type VerifyUserParams = TypeOf<typeof verify>["params"];

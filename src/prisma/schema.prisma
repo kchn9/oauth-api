@@ -12,9 +12,9 @@ model User {
     email                String     @unique
     username             String     @unique
     password             String
-    verified             Boolean?   @default(false)
-    verificationCode     String?
-    passwordResetCode    String?    @default(uuid())
+    verified             Boolean    @default(false)
+    verificationCode     String     @default(cuid())
+    passwordResetCode    String     @default(uuid())
     sessions             Session[]
     notes                Note[]
     createdAt            DateTime   @default(now())

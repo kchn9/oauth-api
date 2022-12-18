@@ -47,6 +47,27 @@ class UserService {
             throw e;
         }
     };
+
+    /**
+     * Verifies user email
+     * @param {string} userId
+     * @param {string} verificationCode
+     */
+    public verify = async (userId: string, verificationCode: string) => {
+        try {
+            const user = await this.find({ id: userId });
+            if (!user) throw new HttpError(404, "User not found");
+            if (user.verified) throw new HttpError(410, "Already verified");
+            if (user.verificationCode !== verificationCode)
+                throw new HttpError(400, "Unable to verify user");
+            await this.dbClient.user.update({
+                where: { id: user.id },
+                data: { verified: true },
+            });
+        } catch (e) {
+            throw e;
+        }
+    };
 }
 
 export default UserService;

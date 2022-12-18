@@ -11,4 +11,12 @@ export default {
         accessTokenTtl: "15m",
         refreshTokenTtl: "1y",
     },
+    smtp: {
+        host: "smtp.gmail.com",
+        port: 465,
+        auth: {
+            user: process.env.GMAIL_SMTP_USER,
+            pass: process.env.GMAIL_SMTP_PASS,
+        },
+    },
 };
