@@ -31,14 +31,14 @@ class UserController implements Controller {
 
     private initializeRoutes = () => {
         /**
-         * @route POST /api/users
-         */
-        this.router.post(this.path, validationMiddleware(create), this.create);
-
-        /**
          * @route GET /api/users
          */
         this.router.get(this.path, requireTokenMiddleware, this.getCurrentUser);
+
+        /**
+         * @route POST /api/users
+         */
+        this.router.post(this.path, validationMiddleware(create), this.create);
 
         /**
          * @route GET /api/users/verify/:id&:verificationCode
@@ -89,7 +89,10 @@ class UserController implements Controller {
             ) {
                 const message =
                     e.meta && e.meta.target
-                        ? `${e.meta.target.toString()} has to be unique.`
+                        ? `${e.meta.target
+                              .toString()
+                              .split("_")
+                              .join(" ")} has to be unique.`
                         : "User fields to be unique.";
                 next(new HttpError(409, message));
             }

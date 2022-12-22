@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
+import VerifiedToken from "../interfaces/VerifiedToken.interface";
+import { requireTokenMiddleware } from "../middleware/requireToken.middleware";
 import Controller from "../interfaces/Controller.interface";
 import { validationMiddleware } from "../middleware/validation.middleware";
 import SessionService from "../services/session.service";
@@ -19,13 +21,18 @@ class SessionController implements Controller {
          * POST /api/sessions
          */
         this.router.post(this.path, validationMiddleware(create), this.create);
+
+        /**
+         * DELETE /api/sessions
+         */
+        this.router.delete(this.path, requireTokenMiddleware, this.invalidate);
     };
 
     private create = async (
         req: Request<{}, {}, CreateSessionBody>,
         res: Response,
         next: NextFunction
-    ) => {
+    ): Promise<void> => {
         try {
             const [accessToken, refreshToken]: [string, string] =
                 await this.service.create(req.body, req.get("user-agent"));
@@ -33,6 +40,20 @@ class SessionController implements Controller {
                 accessToken,
                 refreshToken,
             });
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    private invalidate = async (
+        req: Request<{}, {}, CreateSessionBody>,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const { id: sessionId }: VerifiedToken = res.locals.token;
+            await this.service.invalidate(sessionId);
+            res.sendStatus(204);
         } catch (e) {
             next(e);
         }

@@ -96,6 +96,47 @@ class SessionService {
             throw e;
         }
     };
+
+    /**
+     *
+     */
+    public invalidate = async (sessionId: string): Promise<void> => {
+        try {
+            const session = await this.dbClient.session.findUnique({
+                where: { id: sessionId },
+            });
+            if (!session) {
+                throw new HttpError(404, "Session not found");
+            }
+            if (!session.valid) {
+                throw new HttpError(400, "Session invalid");
+            }
+            await this.dbClient.session.update({
+                where: {
+                    id: session.id,
+                },
+                data: {
+                    valid: false,
+                },
+            });
+        } catch (e) {
+            throw e;
+        }
+    };
+
+    public isValid = async (sessionId: string): Promise<boolean> => {
+        try {
+            const session = await this.dbClient.session.findUnique({
+                where: { id: sessionId },
+            });
+            if (!session) {
+                return false;
+            }
+            return session.valid;
+        } catch (e) {
+            throw e;
+        }
+    };
 }
 
 export default SessionService;
