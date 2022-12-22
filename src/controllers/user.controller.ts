@@ -8,6 +8,11 @@ import UserService from "../services/user.service";
 import {
     create,
     CreateUserBody,
+    sendResetPasswordCode,
+    SendResetPasswordCodeBody,
+    resetPassword,
+    ResetPasswordBody,
+    ResetPasswordParams,
     verify,
     VerifyUserParams,
 } from "../validators/user.validator";
@@ -18,6 +23,7 @@ class UserController implements Controller {
     public path: string = "/users";
     public router: Router = Router();
     private service: UserService = new UserService();
+    private mailer: Mailer = new Mailer();
 
     constructor() {
         this.initializeRoutes();
@@ -46,9 +52,9 @@ class UserController implements Controller {
         /**
          * @route POST /api/users/password/reset
          */
-        this.router.get(
+        this.router.post(
             `${this.path}/password/reset`,
-            // validationMiddleware(send)
+            validationMiddleware(sendResetPasswordCode),
             this.sendResetPasswordCode
         );
 
@@ -57,7 +63,7 @@ class UserController implements Controller {
          */
         this.router.post(
             `${this.path}/password/reset/:id&:resetPasswordCode`,
-            // validationMiddleware(resetPassword)
+            validationMiddleware(resetPassword),
             this.resetPassword
         );
     };
@@ -69,8 +75,7 @@ class UserController implements Controller {
     ) => {
         try {
             const user = await this.service.create(req.body);
-            const mailer = new Mailer();
-            await mailer.sendConfirmationMessage({
+            await this.mailer.sendConfirmationMessage({
                 targetId: user.id,
                 targetEmail: user.email,
                 targetUsername: user.username,
@@ -93,7 +98,7 @@ class UserController implements Controller {
     };
 
     private getCurrentUser = async (
-        req: Request,
+        _req: Request,
         res: Response,
         next: NextFunction
     ) => {
@@ -125,29 +130,52 @@ class UserController implements Controller {
     };
 
     private sendResetPasswordCode = async (
-        req: Request,
+        req: Request<{}, {}, SendResetPasswordCodeBody>,
         res: Response,
         next: NextFunction
     ) => {
         try {
-            // ONLY if email verified
-            // find user by email from POST body post request
-            // create new passwordResetCode and send it by email
+            const email = req.body.email;
+            const user = await this.service.find({
+                email,
+            });
+            if (!user || !user.verified) {
+                throw new HttpError(404, "User email is not verified.");
+            }
+            const resetCode = await this.service.generateResetPasswordCode({
+                id: user.id,
+            });
+            await this.mailer.sendResetMessage({
+                targetEmail: email,
+                resetCode,
+            });
+            res.status(200).json({
+                resetCode,
+            });
         } catch (e) {
             next(e);
         }
     };
 
     private resetPassword = async (
-        req: Request,
+        req: Request<ResetPasswordParams, {}, ResetPasswordBody>,
         res: Response,
         next: NextFunction
     ) => {
         try {
-            // verify and grab user id and passwordResetCode from params
-            // const userId = req.params.id;
-            // const resetPasswordCode = req.params.passwordResetCode;
-            // reset password by taking new password from POST request body
+            const userId = req.params.id;
+            const resetCode = req.params.resetPasswordCode;
+            const newPassword = req.body.password;
+            await this.service.resetPassword(
+                { id: userId },
+                resetCode,
+                newPassword
+            );
+            // generate new code
+            await this.service.generateResetPasswordCode({
+                id: userId,
+            });
+            res.sendStatus(204);
         } catch (e) {
             next(e);
         }

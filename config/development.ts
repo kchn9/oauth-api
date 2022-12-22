@@ -18,5 +18,6 @@ export default {
             user: process.env.GMAIL_SMTP_USER,
             pass: process.env.GMAIL_SMTP_PASS,
         },
+        sender: process.env.GMAIL_SMTP_USER,
     },
 };
