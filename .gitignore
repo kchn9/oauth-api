@@ -4,3 +4,4 @@ node_modules
 .prettierignore
 .prettierrs.json
 dist
+.DS_Store
