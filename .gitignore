@@ -5,3 +5,5 @@ node_modules
 .prettierrs.json
 dist
 .DS_Store
+Dockerfile
+fly.toml
